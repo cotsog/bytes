@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Shap&#39;s Bytes</title>
+    <link>https://theshapguy.com/post/</link>
+    <description>Recent content in Posts on Shap&#39;s Bytes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 03 Jan 2017 12:32:17 -0700</lastBuildDate>
+    
+	<atom:link href="https://theshapguy.com/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Automating Blog Hosting With Ansible</title>
+      <link>https://theshapguy.com/post/automating-blog-hosting-with-ansible/</link>
+      <pubDate>Tue, 03 Jan 2017 12:32:17 -0700</pubDate>
+      
+      <guid>https://theshapguy.com/post/automating-blog-hosting-with-ansible/</guid>
+      <description>Micro Project #1. Please read my Hello World post to find out more about this blog. This fortnight I&amp;rsquo;m working with Ansible to automate blog hosting along with server management.
+This blog post is a hands down tutorial on provisioning a server by hosting a blog using Git and nginx with Ansible.
+ Ansible is a configuration management system. Ansible by default uses the SSH protocol to manage machines.</description>
+    </item>
+    
+    <item>
+      <title>Hello World</title>
+      <link>https://theshapguy.com/post/hello-world/</link>
+      <pubDate>Sun, 01 Jan 2017 21:20:13 -0700</pubDate>
+      
+      <guid>https://theshapguy.com/post/hello-world/</guid>
+      <description>This is my new blog theshapguy.com. Also, my new year&amp;rsquo;s resolution.
+Firstly, a bit of background, I have been learning to program for two years and done nothing much with it. Meaning, I have had no productivity with programming - ABSOLUTE ZERO! Every time I start a project, I manage to somehow stuff it inside my archive folder. And this year is going to change.
+I will be creating a mini project every two week, and in a like manner, a bigger project every month this year.</description>
+    </item>
+    
+  </channel>
+</rss>

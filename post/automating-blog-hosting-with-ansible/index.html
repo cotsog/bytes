@@ -1,0 +1,358 @@
+    <!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Shap&#39;s Bytes">
+		<meta name="description" content="Bits about tech and politics">
+		<meta name="generator" content="Hugo 0.21-DEV" />
+		<title>Automating Blog Hosting With Ansible &middot; Shap&#39;s Bytes</title>
+		<link rel="shortcut icon" href="https://theshapguy.com/images/favicon.ico">
+		<link rel="stylesheet" href="https://theshapguy.com/css/style.css">
+		<link rel="stylesheet" href="https://theshapguy.com/css/highlight.css">
+		
+
+		
+		<link rel="stylesheet" href="https://theshapguy.com/css/monosocialiconsfont.css">
+		
+
+		
+
+		<meta property="og:title" content="Automating Blog Hosting With Ansible" />
+<meta property="og:description" content="Provisioning Blog Server with Ansible" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://theshapguy.com/post/automating-blog-hosting-with-ansible/" />
+
+
+
+<meta property="article:published_time" content="2017-01-03T12:32:17-07:00"/>
+<meta property="article:modified_time" content="2017-01-03T12:32:17-07:00"/>
+
+
+
+
+
+
+
+
+
+
+
+	    
+	    
+<meta itemprop="name" content="Automating Blog Hosting With Ansible">
+<meta itemprop="description" content="Provisioning Blog Server with Ansible">
+
+
+<meta itemprop="dateModified" content="2017-01-03T12:32:17-07:00" />
+<meta itemprop="wordCount" content="821">
+
+
+
+<meta itemprop="keywords" content="" />
+
+	    
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:text:title" content="Automating Blog Hosting With Ansible"/>
+<meta name="twitter:title" content="Automating Blog Hosting With Ansible"/>
+<meta name="twitter:description" content="Provisioning Blog Server with Ansible"/>
+<meta name="twitter:site" content="@https://www.twitter.com/theshapguy"/>
+
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://theshapguy.com/'> <span class="arrow">←</span>Home</a>
+	
+
+	
+		<a href='https://theshapguy.com/about'>pragmatic.</a>
+	
+
+	
+</nav>
+
+        <section id="wrapper">
+            <article class="post">
+                <header>
+                    <h1>Automating Blog Hosting With Ansible</h1>
+                    <h2 class="headline">
+                    January 3, 2017 
+                    <br>
+                    
+                    </h2>
+                </header>
+                <section id="post-body">
+                    
+
+<blockquote>
+<p><strong>Micro Project #1</strong>. Please read my <a href="http://theshapguy.com/post/hello-world">Hello World</a> post to find out more about this blog. This fortnight I&rsquo;m working with Ansible to automate blog hosting along with server management.</p>
+
+<p>This blog post is a hands down tutorial on <code>provisioning</code> a server by hosting a blog using Git and nginx with Ansible.</p>
+</blockquote>
+
+<p>Ansible is a configuration management system. Ansible by default uses the SSH protocol to manage machines. There are other configuration tools like Puppet and Chef, however these require you to install a small piece of software on the client server. Hence, my preference to Ansible.</p>
+
+<h4 id="installing-ansible">Installing Ansible</h4>
+
+<p>We only need to install Ansible on the local computer. However make sure the server has <code>Python 2.7</code> installed.</p>
+
+<p>If you have <a href="http://brew.sh">brew</a> installed on a Mac OS. You can simply do</p>
+
+<pre><code>$ brew install ansible
+</code></pre>
+
+<p>For Ubuntu,</p>
+
+<pre><code>$ sudo apt-get install software-properties-common
+$ sudo apt-add-repository ppa:ansible/ansible
+$ sudo apt-get update
+$ sudo apt-get install ansible
+</code></pre>
+
+<p>Please refer to <a href="http://docs.ansible.com/ansible/intro_installation.html#latest-releases-via-apt-ubuntu">Ansible Installation Docs</a> to install on more OS&rsquo;s</p>
+
+<h4 id="ansible-basics">Ansible Basics</h4>
+
+<p>There are two ways you can use Ansible depending on your use case. Firstly, use can use Ansible like <code>bash</code> scripts. These will be lists of <code>tasks</code> that you use to provision the server.</p>
+
+<p>Secondly, we can use Ansible to create <code>roles</code>. Ansible uses roles to seperate it&rsquo;s blocks of tasks. This allows you to copy blocks from one playbook to another without any hassle. A <code>playbook</code> in essence is how your tasks and roles are executed. Addtionally, it can be uploaded into <a href="https://galaxy.ansible.com">Ansible Galaxy</a> for other people to use it.</p>
+
+<p>An Ansible Role needs to have a specific directory structure. You can manually create this directory structure; an easier way is to use <code>ansible-galaxy init newrole</code>.</p>
+
+<p>This command creates the follwing directory strcuture.</p>
+
+<pre><code>.
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+└── vars
+    └── main.yml
+</code></pre>
+
+<p>Now lets explain each of these.</p>
+
+<p><strong>files</strong>: This directory contains files that will be copied to the host.</p>
+
+<p><strong>handlers</strong>: These are basically tasks which are can be notified to be run after tasks are completed.</p>
+
+<p><strong>meta</strong>: This file cotains the meta information and dependency roles.</p>
+
+<p><strong>templates</strong>: This directory contains templates that use variable subsitution and, then copy it in your host.</p>
+
+<p><strong>tasks</strong>: It contains all of the tasks that the playbook needs to run.</p>
+
+<p><strong>vars</strong>: These are variables that you can use in your roles.</p>
+
+<h4 id="prerequsites">Prerequsites</h4>
+
+<ol>
+<li><p>Make sure you have access to a remote or local Ubuntu Server. I use <a href="https://m.do.co/c/95bdc8dc8e65">DigitalOcean</a> to cater for all my server needs since it is quick and easy to spin up machines.
+<strong>Quick Bonus</strong>: if you sign up throught this <a href="https://m.do.co/c/95bdc8dc8e65">link</a> you get $10 in  <a href="https://m.do.co/c/95bdc8dc8e65">DigitalOcean</a> credit.</p></li>
+
+<li><p>Also make sure you have a static website or a webpage as a git repository.</p></li>
+</ol>
+
+<blockquote>
+<p>All Ansible Playbooks are written in YAML.</p>
+</blockquote>
+
+<p>Now lets get the ball rolling,</p>
+
+<p>Clone the static website from the git respository. But, make sure you change the repo url. Additionally, make sure you set approriate variables in the vars folder. The <code>{{ user }}</code> variable has no default value so make sure you add one to the vars file.</p>
+
+<pre><code>- name: Clone Blog From Github using HTTPS
+  git:
+    repo: https://github.com/theshapguy/bytes.git
+    dest: /home/{{ user }}/blog
+    version: master
+    update: yes
+</code></pre>
+
+<p>We will use nginx as a webserver. You can also use <a href="https://httpd.apache.org/">Apache</a> as well, however the following configuration is for nginx.</p>
+
+<pre><code>- name: Install nginx
+  apt:
+    package: nginx
+    state: latest
+</code></pre>
+
+<p>Now, lets create a <code>template</code> configuration for nginx virtual host.</p>
+
+<pre><code>server {
+   listen 80;
+   listen [::]:80;
+
+   server_name {{ domain }}  www.{{ domain }};
+
+    root /home/{{ user }}/blog;
+    index index.html;
+
+   location / {
+       try_files $uri $uri/ =404;
+   }
+}
+</code></pre>
+
+<p>All <code>variables</code> are replaced using variables defined in the vars directory so make sure these are defined.</p>
+
+<p>Copy this template and configure the nginx symlink. Also make sure that you have removed the default symlink which can cause confliting issues between two nginx configuration.</p>
+
+<pre><code>- name: Copy Nginx Config for Blog to Host
+  template:
+    src: blog.conf.http.j2
+    dest: /etc/nginx/sites-available/blog.nginx.conf
+
+- name: Add Symlink to Host
+  file:
+    src: /etc/nginx/sites-available/blog.nginx.conf
+    dest: /etc/nginx/sites-enabled/blog
+    state: link
+  notify: restart nginx
+
+- name: Remove default symlink
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+</code></pre>
+
+<p>Now lets create a handler to restart nginx. If there are any changes to the file the <code>notify</code> tag is executed and nginx is <code>reloaded</code>.</p>
+
+<pre><code>- name: reload nginx
+  service: name=nginx state=reloaded
+
+  # basically you are doing -&gt; sudo service nginx [options]
+</code></pre>
+
+<p>Now, your website should be running on your <code>{{ domain }}</code> as listed on your vars directory.</p>
+
+<h3 id="final-words">Final Words</h3>
+
+<p>This is a quick and fast way to serve a website using Ansible. Please refer to my Github <a href="https://github.com/theshapguy/52WeeksOfCode/tree/master/blog-hosting-with-ansible">repository</a> for the full playbook. The Github  <a href="https://github.com/theshapguy/52WeeksOfCode/tree/master/blog-hosting-with-ansible">repository</a> also includes setup for a secure (https) website. It installs and renews <code>letsencrypt</code> certificate which makes your blog secure. Refer to this playbook for more tips and tricks that I use to host my <a href="theshapguy.com">blog</a>.</p>
+
+                </section>
+            </article>
+            <footer id="post-meta" class="clearfix">
+                <a href="https://twitter.com/theshapguy">
+                        <img class="avatar" src="https://theshapguy.com/images/avatar.png">
+                        <div>
+                            <span class="dark">Shap&#39;s Bytes</span>
+                            <span></span>
+                        </div>
+                    </a>
+                <section id="sharing">
+                    <a class="twitter" href="https://twitter.com/intent/tweet?text=https%3a%2f%2ftheshapguy.com%2fpost%2fautomating-blog-hosting-with-ansible%2f - Automating%20Blog%20Hosting%20With%20Ansible by @theshapguy"><span class="icon-twitter"> Tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+                </section>
+            </footer>
+
+            
+
+            <ul id="post-list" class="archive readmore">
+    <h3>Read more</h3>
+    
+    
+        
+        <li>
+            <a href="https://theshapguy.com/post/automating-blog-hosting-with-ansible/">Automating Blog Hosting With Ansible<aside class="dates">Jan 3</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="https://theshapguy.com/post/hello-world/">Hello World<aside class="dates">Jan 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="https://theshapguy.com/categories/">Categories<aside class="dates">Jan 1</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="https://theshapguy.com/post/">Posts<aside class="dates">Jan 3</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="https://theshapguy.com/">Shap&#39;s Bytes<aside class="dates">Jan 3</aside></a>
+        </li>
+        
+   
+    
+        
+        <li>
+            <a href="https://theshapguy.com/tags/">Tags<aside class="dates">Jan 1</aside></a>
+        </li>
+        
+   
+</ul>
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    
+    <a class="symbol" href="https://www.github.com/theshapguy">
+        github
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/theshapguy">
+        twitterbird
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+        © Copyright 2017 Shap&#39;s Bytes
+    
+    </p>
+</footer>
+
+        </section>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://theshapguy.com/js/main.js"></script>
+<script src="https://theshapguy.com/js/highlight.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+    </body>
+</html>
