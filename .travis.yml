@@ -1,0 +1,18 @@
+
+os:
+  - osx
+
+before_install:
+  - brew update
+  - brew install ansible
+
+#script:
+#  - ansible-playbook -K main.yml --syntax-check
+
+branches:
+  only:
+  - source
+
+
+notifications:
+  email: false
